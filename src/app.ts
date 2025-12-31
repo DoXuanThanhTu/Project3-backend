@@ -18,7 +18,11 @@ import profileRoute from "./modules/profile/profile.route";
 import { startFlagCronJobs } from "./cron/flagCron";
 
 const app = express();
-const allowedOrigins = ["http://localhost:8000", "http://localhost:3000"];
+const allowedOrigins = [
+  "http://localhost:8000",
+  "http://localhost:3000",
+  "https://movie-website-mytus.netlify.app/",
+];
 
 app.use(
   cors({
