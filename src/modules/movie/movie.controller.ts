@@ -193,32 +193,9 @@ export class MovieController {
         lang: lang as string,
       });
 
-      const data = result.movies.map((movie: any) => ({
-        id: movie._id,
-        title: movie.title,
-        slug: movie.slug,
-        description: movie.description,
-        poster: movie.poster,
-        thumbnail: movie.thumbnail,
-        banner: movie.banner,
-        backdrop: movie.backdrop,
-        trailerUrl: movie.trailerUrl,
-        type: movie.type,
-        year: movie.relasedYear,
-        country: movie.country,
-        duration: movie.duration,
-        currentEpisode: movie.currentEpisode,
-        totalEpisodes: movie.totalEpisodes,
-        seasonOrLabel: movie.seasonOrLabel,
-        rating: movie.ratingAvg,
-        views: movie.views,
-        isPublished: movie.isPublished,
-        flags: movie.flag || [],
-      }));
-
       res.json({
         success: true,
-        data,
+        data: result.movies,
         searchInfo: {
           keyword: result.keyword,
           totalResults: result.pagination.total,
@@ -263,95 +240,95 @@ export class MovieController {
         );
       }
 
-      const formattedMovie = {
-        id: movie._id,
-        title: movie.title,
-        slug: movie.slug,
-        description: movie.description,
-        poster: movie.poster,
-        thumbnail: movie.thumbnail,
-        banner: movie.banner,
-        backdrop: movie.backdrop,
-        trailerUrl: movie.trailerUrl,
-        type: movie.type,
-        // year: movie.relasedYear,
-        country: movie.country,
-        // duration: movie.duration,
-        currentEpisode: movie.currentEpisode,
-        totalEpisodes: movie.totalEpisodes,
-        // seasonOrLabel: movie.seasonOrLabel,
-        rating: movie.ratingAvg,
-        views: movie.views,
-        // franchise: movie.franchiseId
-        //   ? {
-        //       id: movie.franchiseId._id,
-        //       name: movie.franchiseId.name,
-        //     }
-        //   : null,
-        genres:
-          movie.genres?.map((g: any) => ({
-            id: g._id,
-            name: g.name,
-            slug: g.slug,
-          })) || [],
-        cast: movie.cast || [],
-        // director: movie.director
-        //   ? {
-        //       id: movie.director._id,
-        //       name: movie.director.name,
-        //     }
-        //   : null,
-        // flags: movie.flag || [],
-      };
+      // const formattedMovie = {
+      //   id: movie._id,
+      //   title: movie.title,
+      //   slug: movie.slug,
+      //   description: movie.description,
+      //   poster: movie.poster,
+      //   thumbnail: movie.thumbnail,
+      //   banner: movie.banner,
+      //   backdrop: movie.backdrop,
+      //   trailerUrl: movie.trailerUrl,
+      //   type: movie.type,
+      //   // year: movie.relasedYear,
+      //   country: movie.country,
+      //   // duration: movie.duration,
+      //   currentEpisode: movie.currentEpisode,
+      //   totalEpisodes: movie.totalEpisodes,
+      //   // seasonOrLabel: movie.seasonOrLabel,
+      //   rating: movie.ratingAvg,
+      //   views: movie.views,
+      //   // franchise: movie.franchiseId
+      //   //   ? {
+      //   //       id: movie.franchiseId._id,
+      //   //       name: movie.franchiseId.name,
+      //   //     }
+      //   //   : null,
+      //   genres:
+      //     movie.genres?.map((g: any) => ({
+      //       id: g._id,
+      //       name: g.name,
+      //       slug: g.slug,
+      //     })) || [],
+      //   cast: movie.cast || [],
+      //   // director: movie.director
+      //   //   ? {
+      //   //       id: movie.director._id,
+      //   //       name: movie.director.name,
+      //   //     }
+      //   //   : null,
+      //   // flags: movie.flag || [],
+      // };
 
-      const formattedRelatedMovies = relatedMovies
-        .filter((m) => m._id.toString() !== movie._id.toString())
-        .map((movie) => ({
-          id: movie._id,
-          title: movie.title,
-          slug: movie.slug,
-          description: movie.description,
-          poster: movie.poster,
-          thumbnail: movie.thumbnail,
-          banner: movie.banner,
-          backdrop: movie.backdrop,
-          trailerUrl: movie.trailerUrl,
-          type: movie.type,
-          year: movie.relasedYear,
-          country: movie.country,
-          duration: movie.duration,
-          currentEpisode: movie.currentEpisode,
-          totalEpisodes: movie.totalEpisodes,
-          seasonOrLabel: movie.seasonOrLabel,
-          rating: movie.ratingAvg,
-          views: movie.views,
-          franchise: movie.franchiseId
-            ? {
-                id: movie.franchiseId._id,
-                name: movie.franchiseId.name,
-              }
-            : null,
-          genres:
-            movie.genres?.map((g: any) => ({
-              id: g._id,
-              name: g.name,
-              slug: g.slug,
-            })) || [],
-          cast: movie.cast || [],
-          director: movie.director
-            ? {
-                id: movie.director._id,
-                name: movie.director.name,
-              }
-            : null,
-          flags: movie.flag || [],
-        }));
+      // const formattedRelatedMovies = relatedMovies
+      //   .filter((m) => m._id.toString() !== movie._id.toString())
+      //   .map((movie) => ({
+      //     id: movie._id,
+      //     title: movie.title,
+      //     slug: movie.slug,
+      //     description: movie.description,
+      //     poster: movie.poster,
+      //     thumbnail: movie.thumbnail,
+      //     banner: movie.banner,
+      //     backdrop: movie.backdrop,
+      //     trailerUrl: movie.trailerUrl,
+      //     type: movie.type,
+      //     year: movie.relasedYear,
+      //     country: movie.country,
+      //     duration: movie.duration,
+      //     currentEpisode: movie.currentEpisode,
+      //     totalEpisodes: movie.totalEpisodes,
+      //     seasonOrLabel: movie.seasonOrLabel,
+      //     rating: movie.ratingAvg,
+      //     views: movie.views,
+      //     franchise: movie.franchiseId
+      //       ? {
+      //           id: movie.franchiseId._id,
+      //           name: movie.franchiseId.name,
+      //         }
+      //       : null,
+      //     genres:
+      //       movie.genres?.map((g: any) => ({
+      //         id: g._id,
+      //         name: g.name,
+      //         slug: g.slug,
+      //       })) || [],
+      //     cast: movie.cast || [],
+      //     director: movie.director
+      //       ? {
+      //           id: movie.director._id,
+      //           name: movie.director.name,
+      //         }
+      //       : null,
+      //     flags: movie.flag || [],
+      //   }));
 
       res.json({
         success: true,
         data: {
-          movie: formattedMovie,
-          relatedMovies: formattedRelatedMovies,
+          movie: movie,
+          relatedMovies: relatedMovies,
         },
       });
     } catch (error: any) {
@@ -386,51 +363,9 @@ export class MovieController {
         lang: lang as string,
       });
 
-      const data = result.movies.map((movie: any) => ({
-        id: movie._id,
-        title: movie.title,
-        slug: movie.slug,
-        description: movie.description,
-        poster: movie.poster,
-        thumbnail: movie.thumbnail,
-        banner: movie.banner,
-        backdrop: movie.backdrop,
-        trailerUrl: movie.trailerUrl,
-        type: movie.type,
-        year: movie.relasedYear,
-        country: movie.country,
-        duration: movie.duration,
-        currentEpisode: movie.currentEpisode,
-        totalEpisodes: movie.totalEpisodes,
-        seasonOrLabel: movie.seasonOrLabel,
-        rating: movie.ratingAvg,
-        views: movie.views,
-        isPublished: movie.isPublished,
-        franchise: movie.franchiseId
-          ? {
-              id: movie.franchiseId._id,
-              name: movie.franchiseId.name,
-            }
-          : null,
-        genres:
-          movie.genres?.map((g: any) => ({
-            id: g._id,
-            name: g.name,
-            slug: g.slug,
-          })) || [],
-        cast: movie.cast || [],
-        director: movie.director
-          ? {
-              id: movie.director._id,
-              name: movie.director.name,
-            }
-          : null,
-        flags: movie.flag || [],
-      }));
-
       res.json({
         success: true,
-        data,
+        data: result.movies,
         pagination: result.pagination,
       });
     } catch (error: any) {

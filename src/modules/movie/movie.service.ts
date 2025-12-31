@@ -415,7 +415,7 @@ export class MovieService {
     ]);
     // console.log(movies);
     return {
-      movies: movies,
+      movies: movies.map((movie) => this.formatMovieMap(movie, lang)),
       pagination: {
         page,
         limit,
