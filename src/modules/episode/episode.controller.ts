@@ -28,6 +28,7 @@ export class EpisodeController {
       isPublished: ep.isPublished,
       createdAt: ep.createdAt,
       updatedAt: ep.updatedAt,
+      movie: ep.movieId || null,
     }));
 
     res.json({ success: true, data });

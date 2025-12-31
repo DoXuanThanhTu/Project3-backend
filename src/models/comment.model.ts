@@ -1,4 +1,4 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
 import { IComment } from "../types/comment.type";
 
 const commentSchema = new Schema<IComment>(
@@ -10,10 +10,13 @@ const commentSchema = new Schema<IComment>(
     seasonOrLabel: { type: String },
     episode: { type: Number },
 
-    likes: { type: Number, default: 0 },
-    dislikes: { type: Number, default: 0 },
-    shares: { type: Number, default: 0 },
-    useful: { type: Number, default: 0 },
+    // Danh sách user đã like
+    likes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+
+    // Nếu bạn muốn dislikes cũng là danh sách user, có thể đổi tương tự
+    dislikes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    shares: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    useful: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
 
     parentId: { type: Schema.Types.ObjectId, ref: "Comment" },
     isEdited: { type: Boolean, default: false },

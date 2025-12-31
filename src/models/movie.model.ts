@@ -1,9 +1,51 @@
 import { Schema, model, Types, Document } from "mongoose";
-import { IMovie, MovieType } from "../types/movie.type";
+import { IMovie, MovieFlagType, MovieType } from "../types/movie.type";
+
+// const movieSchema = new Schema<IMovie>(
+//   {
+//     // ===== I18N =====
+
+//   },
+//   { timestamps: true }
+// );
+
+// export const MovieModel = model<IMovie>("Movie", movieSchema);
+// // src/models/Movie.model.ts
+// import { Schema, model, Types, Document } from "mongoose";
+// import { IMovie, MovieType, MovieFlagType } from "../types/movie.type";
+
+const movieFlagSchema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: Object.values(MovieFlagType),
+      required: true,
+    },
+    source: {
+      type: String,
+      enum: ["admin", "system"],
+      required: true,
+    },
+    startAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+    endAt: {
+      type: Date,
+      default: null,
+    },
+    metadata: {
+      score: { type: Number, default: 0 },
+      reason: { type: String },
+      priority: { type: Number, default: 1 },
+    },
+  },
+  { _id: false, timestamps: true }
+);
 
 const movieSchema = new Schema<IMovie>(
   {
-    // ===== I18N =====
     franchiseId: { type: Types.ObjectId, ref: "Franchise" },
 
     title: {
@@ -55,8 +97,28 @@ const movieSchema = new Schema<IMovie>(
     year: { type: Number }, // Năm sản xuất
     country: { type: String }, // Quốc gia (có thể nhiều)
     isPublished: { type: Boolean, default: false },
+    // ... các field hiện có giữ nguyên ...
+
+    // Thêm flags
+    flags: [movieFlagSchema],
+
+    // Thêm field thống kê
+    dailyViews: { type: Number, default: 0 },
+    weeklyViews: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+    favorites: { type: Number, default: 0 },
+    shares: { type: Number, default: 0 },
+    comments: { type: Number, default: 0 },
+    lastTrendingUpdate: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
+
+// Indexes cho query hiệu quả
+movieSchema.index({ "flags.type": 1, "flags.endAt": 1 });
+movieSchema.index({ "flags.type": 1, "flags.startAt": 1, "flags.endAt": 1 });
+movieSchema.index({ dailyViews: -1 });
+movieSchema.index({ weeklyViews: -1 });
+movieSchema.index({ "flags.type": 1, "metadata.score": -1 });
 
 export const MovieModel = model<IMovie>("Movie", movieSchema);

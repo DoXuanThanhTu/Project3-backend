@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { NotFoundError } from "../../errors/http.error";
 import { EpisodeModel } from "../../models/episode.model";
 import { IEpisode } from "../../types/episode.type";
@@ -18,7 +19,9 @@ export class EpisodeService {
   }
 
   static async getByMovie(movieId: string, limit?: number) {
-    const query = EpisodeModel.find({ movieId: movieId, isPublished: true })
+    const id = new Types.ObjectId(movieId);
+
+    const query = EpisodeModel.find({ movieId: id, isPublished: true })
       .sort({ createdAt: 1 })
       .populate("movieId")
       .populate("serverId");

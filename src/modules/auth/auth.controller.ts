@@ -13,6 +13,7 @@ export class AuthController {
 
     res.status(201).json({
       success: true,
+      user: data.user,
       accessToken: data.accessToken,
     });
   }
@@ -25,9 +26,9 @@ export class AuthController {
     );
 
     AuthController.setRefreshCookie(res, data.refreshToken);
-
     res.json({
       success: true,
+      user: data.user,
       accessToken: data.accessToken,
     });
   }

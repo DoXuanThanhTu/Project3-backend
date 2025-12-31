@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export enum MovieType {
   MOVIE = "MOVIE",
   SERIES = "SERIES",
@@ -7,10 +9,29 @@ export enum MovieType {
   SHORT = "SHORT",
   SPECIAL = "SPECIAL",
 }
-
+export enum MovieFlagType {
+  TRENDING = "trending",
+  HOT = "hot",
+  FEATURED = "featured",
+  FAVORITE = "favorite",
+  PROMOTION = "promotion", // Có thể thêm các flag khác
+}
+export interface MovieFlag {
+  type: MovieFlagType;
+  source: "admin" | "system"; // Nguồn gán flag
+  startAt: Date;
+  endAt: Date | null; // null nếu không có thời gian kết thúc
+  metadata?: {
+    score?: number; // Điểm số tính toán (cho system)
+    reason?: string; // Lý do (cho admin)
+    priority?: number; // Độ ưu tiên hiển thị
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
 export interface IMovie {
-  id?: string;
-  franchiseId?: string;
+  id?: Types.ObjectId;
+  franchiseId?: Types.ObjectId;
 
   title: Map<string, string>;
   description?: Map<string, string>;
@@ -28,12 +49,22 @@ export interface IMovie {
   currentEpisode?: number;
   totalEpisodes?: number;
   genres?: string[];
-  cast?: string[];
-  director?: string;
+  cast?: Types.ObjectId[];
+  director?: Types.ObjectId[];
 
   ratingAvg: number;
   views: number;
   year?: number;
   country?: string;
   isPublished: boolean;
+  flags: MovieFlag[];
+  dailyViews: number; // Lượt xem trong ngày
+  weeklyViews: number; // Lượt xem trong tuần
+  likes: number;
+  favorites: number;
+  shares: number;
+  comments: number;
+
+  // Timestamps cho tính toán
+  lastTrendingUpdate: Date;
 }

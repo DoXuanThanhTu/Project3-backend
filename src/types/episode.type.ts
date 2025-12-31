@@ -1,14 +1,16 @@
+import { Types } from "mongoose";
+
 export interface IEpisode {
-  id: string;
+  id: Types.ObjectId;
 
   // Liên kết tới phim và server
-  movieId?: string; // id phim cha
-  serverId?: string; // id server stream (nếu có nhiều server)
+  movieId?: Types.ObjectId; // id phim cha
+  serverId?: Types.ObjectId; // id server stream (nếu có nhiều server)
 
   // Thông tin đa ngôn ngữ
-  title: Map<string, string>; // tiêu đề theo ngôn ngữ { vi: "...", en: "..." }
-  description?: Map<string, string>; // mô tả theo ngôn ngữ
-  slug: Map<string, string>; // slug theo ngôn ngữ
+  title: Record<string, string>; // tiêu đề theo ngôn ngữ { vi: "...", en: "..." }
+  description?: Record<string, string>; // mô tả theo ngôn ngữ
+  slug: Record<string, string>; // slug theo ngôn ngữ
   defaultLang: string; // ngôn ngữ mặc định
 
   // Thông tin tập

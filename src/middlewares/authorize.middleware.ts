@@ -5,13 +5,6 @@ import { Role } from "../types/role.type";
 export const authorize =
   (allowedRoles: Role[]) =>
   (req: Request, _res: Response, next: NextFunction) => {
-    /**
-     * req.user được gắn từ auth.middleware
-     * {
-     *   userId: string;
-     *   role: "USER" | "ADMIN";
-     * }
-     */
     if (!req.user) {
       throw new ForbiddenError("User not authenticated");
     }

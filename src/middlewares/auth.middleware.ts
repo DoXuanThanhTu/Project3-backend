@@ -18,12 +18,11 @@ export const authenticate = (
       throw new UnauthorizedError("Token not found");
     }
 
-    // verifyAccessToken trả về payload (ví dụ: { userId, role, email })
     const payload = verifyAccessToken(token);
-    req.user = payload; // cần mở rộng type Request để có user
-    console.log("Authenticated user:", payload);
+    req.user = payload;
+
     next();
   } catch (error) {
-    next(error); // chuyển lỗi cho error handler middleware
+    next(error);
   }
 };

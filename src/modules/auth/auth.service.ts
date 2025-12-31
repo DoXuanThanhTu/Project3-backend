@@ -23,10 +23,17 @@ export class AuthService {
 
   static async login(email: string, password: string, meta: TokenMeta) {
     const user = await UserModel.findOne({ email });
-    if (!user) throw new UnauthorizedError();
-
+    if (!user) {
+      console.log("Khong co user");
+      throw new UnauthorizedError();
+    }
+    console.log(password, user.password);
     const ok = await comparePassword(password, user.password);
-    if (!ok) throw new UnauthorizedError();
+    if (!ok) {
+      console.log("mk k đúng", password);
+
+      throw new UnauthorizedError();
+    }
 
     return this.issueTokens(user, meta);
   }
@@ -89,6 +96,7 @@ export class AuthService {
         role: user.role,
       }),
       refreshToken,
+      user,
     };
   }
 
