@@ -105,7 +105,7 @@ export class MovieService {
         .limit(limit)
         .sort(sortOption)
         .populate("genres")
-        .populate("franchiseId", "name _id")
+        .populate("franchiseId", "_id title")
         .populate("director"),
       MovieModel.countDocuments(query),
     ]);
@@ -127,17 +127,16 @@ export class MovieService {
       isPublished: true,
     })
       .populate("genres")
-      .populate("franchiseId", "name _id")
+      .populate("franchiseId", "_id title")
       .populate("cast")
       .populate("director");
 
     if (!movie) throw new NotFoundError("Movie not found");
 
     // tăng view
-    movie.views += 1;
-    await movie.save();
-
-    return this.formatMovieForDetail(movie, lang);
+    // movie.views += 1;
+    // await movie.save();
+    return this.formatMovieMap(movie, lang);
   }
 
   static async getMoviesByGenreSlug(
@@ -211,8 +210,8 @@ export class MovieService {
         .skip(skip)
         .limit(limit)
         .sort(sortOption)
+        .populate("franchiseId", "_id title")
         .populate("genres")
-        .populate("franchiseId", "name _id")
         .populate("director"),
       MovieModel.countDocuments(query),
     ]);
@@ -335,7 +334,7 @@ export class MovieService {
     const id = new Types.ObjectId(franchiseId);
     const movies = await MovieModel.find({ franchiseId: id, isPublished: true })
       .sort({ createdAt: -1 })
-      .populate("franchiseId", "name _id")
+      .populate("franchiseId", "title _id")
       .populate("genres")
       .populate("director");
     return movies.map((movie) => this.formatMovieMap(movie, lang));
@@ -404,20 +403,19 @@ export class MovieService {
     sortOption[dbSortField] = sort_type === "asc" ? 1 : -1;
 
     const skip = (page - 1) * limit;
-
     const [movies, total] = await Promise.all([
       MovieModel.find(query)
         .skip(skip)
         .limit(limit)
         .sort(sortOption)
         .populate("genres")
-        .populate("franchiseId", "name _id")
+        .populate("franchiseId", "_id title")
         .populate("director"),
       MovieModel.countDocuments(query),
     ]);
-
+    // console.log(movies);
     return {
-      movies: movies.map((movie) => this.formatMovieMap(movie, lang)),
+      movies: movies,
       pagination: {
         page,
         limit,
@@ -437,8 +435,8 @@ export class MovieService {
         [`slug.${lang}`]: slug,
         isPublished: true,
       })
-        .populate("franchiseId", "name slug")
-        .populate("genres", "name slug")
+        .populate("franchiseId", "title slug")
+        .populate("genres", "title slug")
         .populate("director", "name")
         .populate("cast", "name avatar")
         .lean();
@@ -470,7 +468,7 @@ export class MovieService {
       const genresDetails = await GenreModel.find({
         _id: { $in: movie.genres || [] },
       })
-        .select("name slug description")
+        .select("title slug description")
         .lean();
 
       // 6. Lấy các movie cùng franchise (nếu có)
@@ -481,8 +479,8 @@ export class MovieService {
           _id: { $ne: movie._id },
           isPublished: true,
         })
-          .populate("franchiseId", "_id name")
-          .populate("genres", "_id name slug")
+          .populate("franchiseId", "_id title")
+          .populate("genres", "_id title slug")
           .lean();
       }
 
@@ -494,9 +492,8 @@ export class MovieService {
         isPublished: true,
       })
         .limit(8)
-        .populate("genres", "_id name slug")
-        .populate("franchiseId", "_id name")
-
+        .populate("genres", "_id title slug")
+        .populate("franchiseId", "_id title")
         .select("_id title slug poster thumbnail type year ratingAvg views")
         .lean();
       const relatedByGenre = resRelatedByGenre;
@@ -692,8 +689,8 @@ export class MovieService {
       franchise: movie.franchiseId
         ? {
             id: movie.franchiseId._id,
-            name: getLocalizedValue(
-              movie.franchiseId.name,
+            title: getLocalizedValue(
+              movie.franchiseId.title,
               lang as string,
               movie.defaultLang
             ),
@@ -702,7 +699,7 @@ export class MovieService {
       genres:
         movie.genres?.map((g: any) => ({
           id: g._id,
-          name: getLocalizedValue(g.name, lang as string, movie.defaultLang),
+          title: getLocalizedValue(g.title, lang as string, movie.defaultLang),
           slug: getLocalizedValue(g.slug, lang as string, movie.defaultLang),
         })) || [],
       poster: movie.poster,
@@ -720,7 +717,6 @@ export class MovieService {
    * Format movie cho danh sách
    */
   private static formatMovieMap(movie: any, lang: string): any {
-    console.log(movie);
     return {
       id: movie._id,
       title: getLocalizedValueMap(movie.title, lang, movie.defaultLang),
@@ -733,8 +729,8 @@ export class MovieService {
       franchise: movie.franchiseId
         ? {
             id: movie.franchiseId._id,
-            name: getLocalizedValueMap(
-              movie.franchiseId.name,
+            title: getLocalizedValueMap(
+              movie.franchiseId.title,
               lang as string,
               movie.defaultLang
             ),
@@ -743,7 +739,11 @@ export class MovieService {
       genres:
         movie.genres?.map((g: any) => ({
           id: g._id,
-          name: getLocalizedValueMap(g.name, lang as string, movie.defaultLang),
+          title: getLocalizedValueMap(
+            g.title,
+            lang as string,
+            movie.defaultLang
+          ),
           slug: getLocalizedValueMap(g.slug, lang as string, movie.defaultLang),
         })) || [],
       poster: movie.poster,

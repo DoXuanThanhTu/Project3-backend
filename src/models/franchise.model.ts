@@ -3,7 +3,7 @@ import { IFranchise } from "../types/franchise.type";
 
 const franchiseSchema = new Schema<IFranchise>(
   {
-    name: { type: Map, of: String, required: true },
+    title: { type: Map, of: String, required: true },
     description: { type: Map, of: String, required: true },
     slug: { type: Map, of: String, required: true },
     movies: [{ type: Schema.Types.ObjectId, ref: "Movie" }],

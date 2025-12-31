@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { GenreService } from "./genre.service";
-import { getLocalizedValue } from "../../utils/i18n.util";
+import { getLocalizedValueMap } from "../../utils/i18n.util";
 
 export class GenreController {
   // ===== PUBLIC =====
@@ -10,8 +10,9 @@ export class GenreController {
 
     const data = genres.map((g: any) => ({
       id: g._id,
-      name: getLocalizedValue(g.name, lang, g.defaultLang),
-      slug: getLocalizedValue(g.slug, lang, g.defaultLang),
+      title: getLocalizedValueMap(g.title, lang, g.defaultLang),
+      slug: getLocalizedValueMap(g.slug, lang, g.defaultLang),
+      description: getLocalizedValueMap(g.description, lang, g.defaultLang),
     }));
 
     res.json({ success: true, data });
@@ -25,8 +26,9 @@ export class GenreController {
       success: true,
       data: {
         id: genre._id,
-        name: getLocalizedValue(genre.name, lang, genre.defaultLang),
-        description: getLocalizedValue(
+        title: getLocalizedValueMap(genre.title, lang, genre.defaultLang),
+        slug: getLocalizedValueMap(genre.slug, lang, genre.defaultLang),
+        description: getLocalizedValueMap(
           genre.description,
           lang,
           genre.defaultLang

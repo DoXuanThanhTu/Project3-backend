@@ -29,64 +29,6 @@ export class MovieController {
         year: year as string,
         lang: lang as string,
       });
-
-      // Format response
-      // const data = result.movies.map((movie: any) => ({
-      //   id: movie._id,
-      //   title: getLocalizedValue(
-      //     movie.title,
-      //     lang as string,
-      //     movie.defaultLang
-      //   ),
-      //   slug: getLocalizedValue(movie.slug, lang as string, movie.defaultLang),
-      //   description: getLocalizedValue(
-      //     movie.description,
-      //     lang as string,
-      //     movie.defaultLang
-      //   ),
-      //   poster: movie.poster,
-      //   thumbnail: movie.thumbnail,
-      //   banner: movie.banner,
-      //   backdrop: movie.backdrop,
-      //   trailerUrl: movie.trailerUrl,
-      //   type: movie.type,
-      //   year: movie.relasedYear,
-      //   country: movie.country,
-      //   duration: movie.duration,
-      //   currentEpisode: movie.currentEpisode,
-      //   totalEpisodes: movie.totalEpisodes,
-      //   seasonOrLabel: movie.seasonOrLabel,
-      //   ratingAvg: movie.ratingAvg,
-      //   views: movie.views,
-      //   isPublished: movie.isPublished,
-      //   createdAt: movie.createdAt,
-      //   updatedAt: movie.updatedAt,
-      //   franchise: movie.franchiseId
-      //     ? {
-      //         id: movie.franchiseId._id,
-      //         name: getLocalizedValue(
-      //           movie.franchiseId.name,
-      //           lang as string,
-      //           movie.defaultLang
-      //         ),
-      //       }
-      //     : null,
-      //   genres:
-      //     movie.genres?.map((g: any) => ({
-      //       id: g._id,
-      //       name: getLocalizedValue(g.name, lang as string, movie.defaultLang),
-      //       slug: getLocalizedValue(g.slug, lang as string, movie.defaultLang),
-      //     })) || [],
-      //   cast: movie.cast || [],
-      //   director: movie.director
-      //     ? {
-      //         id: movie.director._id,
-      //         name: movie.director.name,
-      //       }
-      //     : null,
-      //   flags: movie.flag || [],
-      // }));
-
       res.json({
         success: true,
         data: result.movies,
@@ -107,49 +49,7 @@ export class MovieController {
 
       const movies = await MovieService.getMoviesByFranchise(franchiseId, lang);
 
-      const data = movies.map((movie: any) => ({
-        id: movie._id,
-        title: movie.title,
-        slug: movie.slug,
-        description: movie.description,
-        poster: movie.poster,
-        thumbnail: movie.thumbnail,
-        banner: movie.banner,
-        backdrop: movie.backdrop,
-        trailerUrl: movie.trailerUrl,
-        type: movie.type,
-        year: movie.relasedYear,
-        country: movie.country,
-        duration: movie.duration,
-        currentEpisode: movie.currentEpisode,
-        totalEpisodes: movie.totalEpisodes,
-        seasonOrLabel: movie.seasonOrLabel,
-        rating: movie.ratingAvg,
-        views: movie.views,
-        isPublished: movie.isPublished,
-        franchise: movie.franchiseId
-          ? {
-              id: movie.franchiseId._id,
-              name: movie.franchiseId.name,
-            }
-          : null,
-        genres:
-          movie.genres?.map((g: any) => ({
-            id: g._id,
-            name: g.name,
-            slug: g.slug,
-          })) || [],
-        cast: movie.cast || [],
-        director: movie.director
-          ? {
-              id: movie.director._id,
-              name: movie.director.name,
-            }
-          : null,
-        flags: movie.flag || [],
-      }));
-
-      res.json({ success: true, data });
+      res.json({ success: true, data: movies });
     } catch (error: any) {
       console.error("Error in getMovieByFranchise:", error);
       res.status(500).json({
@@ -292,13 +192,13 @@ export class MovieController {
         franchise: movie.franchiseId
           ? {
               id: movie.franchiseId._id,
-              name: movie.franchiseId.name,
+              title: movie.franchiseId.title,
             }
           : null,
         genres:
           movie.genres?.map((g: any) => ({
             id: g._id,
-            name: g.name,
+            title: g.title,
             slug: g.slug,
           })) || [],
         cast: movie.cast || [],
@@ -313,7 +213,7 @@ export class MovieController {
 
       const genreInfo = {
         id: result.genre._id,
-        name: result.genre.name,
+        title: result.genre.title,
         slug: result.genre.slug,
         description: result.genre.description,
       };
@@ -321,7 +221,7 @@ export class MovieController {
       res.json({
         success: true,
         data,
-        genre: genreInfo,
+        // genre: genreInfo,
         pagination: result.pagination,
       });
     } catch (error: any) {

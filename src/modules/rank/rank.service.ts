@@ -77,7 +77,7 @@ export class RankService {
     period: RankPeriod,
     filter: Omit<IRankFilter, "period" | "type">
   ): Promise<IRankResponse> {
-    const { genre, country, year, limit, page, lang } = filter;
+    const { genre, country, year, limit = 24, page = 1, lang = "vi" } = filter;
     const skip = (page - 1) * limit;
 
     // Xác định khoảng thời gian
@@ -157,7 +157,7 @@ export class RankService {
     period: RankPeriod,
     filter: Omit<IRankFilter, "period" | "type">
   ): Promise<IRankResponse> {
-    const { genre, country, year, limit, page, lang } = filter;
+    const { genre, country, year, limit = 24, page = 1, lang = "vi" } = filter;
     const skip = (page - 1) * limit;
 
     const query: any = { isPublished: true, ratingAvg: { $gt: 0 } };
@@ -205,7 +205,7 @@ export class RankService {
   private async getNewestRanks(
     filter: Omit<IRankFilter, "period" | "type">
   ): Promise<IRankResponse> {
-    const { genre, country, year, limit, page, lang } = filter;
+    const { genre, country, year, limit = 24, page = 1, lang = "vi" } = filter;
     const skip = (page - 1) * limit;
 
     const query: any = { isPublished: true };
@@ -248,7 +248,7 @@ export class RankService {
     period: RankPeriod,
     filter: Omit<IRankFilter, "period" | "type">
   ): Promise<IRankResponse> {
-    const { genre, country, year, limit, page, lang } = filter;
+    const { genre, country, year, limit = 24, page = 1, lang = "vi" } = filter;
     const skip = (page - 1) * limit;
 
     const dateFilter = this.getDateFilter(period);

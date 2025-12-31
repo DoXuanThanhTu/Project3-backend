@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PersonService } from "./person.service";
-import { getLocalizedValue } from "../../utils/i18n.util";
+import { getLocalizedValue, getLocalizedValueMap } from "../../utils/i18n.util";
 import { PersonRole } from "../../types/person.type";
 
 export class PersonController {
@@ -30,8 +30,8 @@ export class PersonController {
       success: true,
       data: {
         id: person._id,
-        name: getLocalizedValue(person.name, lang, person.defaultLang),
-        bio: getLocalizedValue(person.bio, lang, person.defaultLang),
+        name: getLocalizedValueMap(person.name, lang, person.defaultLang),
+        bio: getLocalizedValueMap(person.bio, lang, person.defaultLang),
         avatar: person.avatar,
         cover: person.cover,
         birthday: person.birthday,

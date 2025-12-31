@@ -1,19 +1,6 @@
 import { Schema, model, Types, Document } from "mongoose";
 import { IMovie, MovieFlagType, MovieType } from "../types/movie.type";
 
-// const movieSchema = new Schema<IMovie>(
-//   {
-//     // ===== I18N =====
-
-//   },
-//   { timestamps: true }
-// );
-
-// export const MovieModel = model<IMovie>("Movie", movieSchema);
-// // src/models/Movie.model.ts
-// import { Schema, model, Types, Document } from "mongoose";
-// import { IMovie, MovieType, MovieFlagType } from "../types/movie.type";
-
 const movieFlagSchema = new Schema(
   {
     type: {

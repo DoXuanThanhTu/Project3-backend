@@ -3,7 +3,7 @@ import { IGenre } from "../types/genre.type";
 const genreSchema = new Schema<IGenre>(
   {
     // ===== I18N =====
-    name: {
+    title: {
       type: Map,
       of: String,
       required: true,
