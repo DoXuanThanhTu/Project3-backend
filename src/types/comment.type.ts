@@ -11,19 +11,24 @@ export interface IComment {
   movie?: IMovie;
   movieId?: string; // id phim
   movieName?: string; // tên phim tại thời điểm comment
-  seasonOrLabel?: string; // ví dụ: "2", "OVA1", "Special"
+  episodeOrLabel?: string; // ví dụ: "2", "OVA1", "Special"
   episode?: number; // số tập (nếu là series)
   user?: IUser;
   // Các hành động xã hội
-  likes?: number; // số lượt thích
-  dislikes?: number; // số lượt không thích
-  shares?: number; // số lượt chia sẻ
-  useful?: number; // số lượt đánh dấu hữu ích
+  likes?: string[]; // danh sách user đã thích
+  dislikes?: string[]; // danh sách user đã không thích
+  shares?: string[]; // danh sách user đã chia sẻ
+  useful?: string[]; // danh sách user đã đánh dấu hữu ích
 
   // Comment lồng nhau
-  parentId?: string; // id comment cha (nếu là reply)
+  parentId?: string | null; // id comment cha (nếu là reply)
   replies?: IComment[]; // danh sách reply con
-
+  replyCount?: number; // số lượng reply con
+  // Tổng hợp hành động
+  totalLike?: number;
+  totalDislike?: number;
+  totalUseful?: number;
+  totalShare?: number;
   // Trạng thái
   isEdited?: boolean; // comment đã chỉnh sửa chưa
   isDeleted?: boolean; // comment đã bị xoá chưa

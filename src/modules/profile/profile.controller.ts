@@ -6,8 +6,26 @@ import { Role } from "../../types/role.type";
 
 export class ProfileController {
   // Lấy profile user
+  static async getMe(req: Request, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await ProfileService.getUserProfile(userId);
+      res.json({
+        success: true,
+        data: user,
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Server error", error });
+    }
+  }
+
   static async getUserProfile(req: Request, res: Response) {
     try {
+      const s = req.header;
+      console.log(req.header);
       const { userId } = req.params;
       const user = await ProfileService.getUserProfile(userId);
 
@@ -24,25 +42,26 @@ export class ProfileController {
   // Cập nhật profile
   static async updateProfile(req: Request, res: Response) {
     try {
-      const { userId } = req.params;
-      if (userId === req.user?.userId || req.user?.role === Role.ADMIN) {
-        const { displayName, phone, avatar, coverImage } = req.body;
+      if (!req.user) throw new UnauthorizedError();
+      // const { userId } = req.params;
+      // const { displayName, phone, avatar, coverImage } = req.body;
 
-        const updateData: any = {};
-        if (displayName !== undefined) updateData.displayName = displayName;
-        if (phone !== undefined) updateData.phone = phone;
-        if (avatar !== undefined) updateData.avatar = avatar;
-        if (coverImage !== undefined) updateData.coverImage = coverImage;
+      // const updateData: any = {};
+      // if (displayName !== undefined) updateData.displayName = displayName;
+      // if (phone !== undefined) updateData.phone = phone;
+      // if (avatar !== undefined) updateData.avatar = avatar;
+      // if (coverImage !== undefined) updateData.coverImage = coverImage;
 
-        const user = await ProfileService.updateUserProfile(userId, updateData);
+      const user = await ProfileService.updateUserProfile(
+        req.user.userId,
+        req.body
+      );
 
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
-        }
-
-        res.json(user);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
-      throw new UnauthorizedError();
+
+      res.json(user);
     } catch (error) {
       res.status(500).json({ message: "Server error", error });
     }

@@ -22,6 +22,6 @@ router.post(
 
 router.post("/refresh", validate(refreshSchema), AuthController.refresh);
 
-router.post("/logout", validate(refreshSchema), AuthController.logout);
+router.post("/logout", AuthController.logout);
 
 export default router;

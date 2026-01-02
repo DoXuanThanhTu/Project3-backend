@@ -46,22 +46,29 @@ export class AuthController {
   }
 
   static async logout(req: Request, res: Response) {
-    const refreshToken = req.cookies.refreshToken;
-    await AuthService.logout(refreshToken);
+    try {
+      const refreshToken = req.cookies?.refreshToken;
+      if (refreshToken) {
+        await AuthService.logout(refreshToken);
+      }
 
-    res.clearCookie("refreshToken", {
-      path: "/api/auth/refresh",
-    });
+      res.clearCookie("refreshToken", {
+        path: "/api/auth",
+      });
 
-    res.json({ success: true });
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Logout error:", error);
+      return res.status(500).json({ message: "Logout failed" });
+    }
   }
 
   private static setRefreshCookie(res: Response, token: string) {
     res.cookie("refreshToken", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/api/auth/refresh",
+      secure: true,
+      sameSite: "none",
+      path: "/api/auth",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }

@@ -12,7 +12,10 @@ import {
 } from "../../types/test.type";
 
 export class ProfileService {
-  // User Profile Services
+  static async getMe(userId: string) {
+    return await UserModel.findById(userId).select("-password").lean();
+  }
+
   static async getUserProfile(userId: string) {
     return await UserModel.findById(userId).select("-password").lean();
   }

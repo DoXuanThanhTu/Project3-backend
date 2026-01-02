@@ -14,6 +14,7 @@ import episodeRoute from "./modules/episode/episode.route";
 import serverRoute from "./modules/server/server.route";
 import rankRoute from "./modules/rank/rank.route";
 import profileRoute from "./modules/profile/profile.route";
+import cookieParser from "cookie-parser";
 
 import { startFlagCronJobs } from "./cron/flagCron";
 
@@ -41,6 +42,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(cookieParser());
 app.use(express.json());
 app.use(globalRateLimit);
 

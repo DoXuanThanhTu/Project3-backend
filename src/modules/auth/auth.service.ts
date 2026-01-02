@@ -68,8 +68,11 @@ export class AuthService {
     });
   }
 
-  static async logout(refreshToken: string) {
+  static async logout(refreshToken?: string) {
+    if (!refreshToken) return;
+
     const tokenHash = this.hashToken(refreshToken);
+
     await RefreshTokenModel.updateOne({ tokenHash }, { revoked: true });
   }
 

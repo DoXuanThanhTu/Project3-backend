@@ -7,7 +7,7 @@ const commentSchema = new Schema<IComment>(
     content: { type: String, required: true },
 
     movieId: { type: Schema.Types.ObjectId, ref: "Movie" },
-    seasonOrLabel: { type: String },
+    episodeOrLabel: { type: String },
     episode: { type: Number },
 
     // Danh sách user đã like
@@ -18,9 +18,14 @@ const commentSchema = new Schema<IComment>(
     shares: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     useful: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
 
-    parentId: { type: Schema.Types.ObjectId, ref: "Comment" },
+    parentId: { type: Schema.Types.ObjectId, ref: "Comment", default: null },
     isEdited: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
+    replyCount: { type: Number, default: 0 }, // ⭐ QUAN TRỌNG
+    totalLike: { type: Number, default: 0 },
+    totalDislike: { type: Number, default: 0 },
+    totalUseful: { type: Number, default: 0 },
+    totalShare: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

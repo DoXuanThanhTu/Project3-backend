@@ -343,12 +343,12 @@ export class MovieService {
   static async getMovieById(id: string, lang: string = "vi") {
     const movie = await MovieModel.findById(id)
       .populate("genres")
-      .populate("franchiseId", "name _id")
+      .populate("franchiseId", "title _id")
       .populate("cast")
       .populate("director");
 
     if (!movie) throw new NotFoundError("Movie not found");
-    return this.formatMovieForDetail(movie, lang);
+    return this.formatMovieMap(movie, lang);
   }
 
   static async getMoviesByType(
@@ -748,6 +748,8 @@ export class MovieService {
         })) || [],
       poster: movie.poster,
       thumbnail: movie.thumbnail,
+      banner: movie.banner,
+      backdrop: movie.backdrop,
       type: movie.type,
       year: movie.year,
       ratingAvg: movie.ratingAvg,
@@ -880,7 +882,7 @@ export class MovieService {
     ]);
 
     return {
-      movies: movies.map((movie) => this.formatMovieForDetail(movie, "vi")),
+      movies: movies,
       pagination: {
         page,
         limit,

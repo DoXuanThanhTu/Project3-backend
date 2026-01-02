@@ -7,16 +7,22 @@ import { Role } from "../../types/role.type";
 const router = Router();
 
 // ===== PUBLIC =====
+router.get("/root", CommentController.getRootComment);
+router.delete("/:id", CommentController.delete);
+router.get("/replies/:rootId", CommentController.getRepliesByRoot);
 router.get("/movie/:movieId", CommentController.getByMovie);
 router.get("/:id", CommentController.getDetail);
 router.get("/", CommentController.getAllComment);
 
-// ===== ADMIN / USER =====
+// ===== USER =====
 router.use(authenticate);
-router.use(authorize([Role.ADMIN]));
-router.get("/admin/all", CommentController.getAll);
+
 router.post("/", CommentController.create);
 router.patch("/:id", CommentController.update);
-router.delete("/:id", CommentController.delete);
+router.post("/react/:id", CommentController.react);
 
+// ===== ADMIN =====
+
+router.use(authorize([Role.ADMIN]));
+router.get("/admin/all", CommentController.getAll);
 export default router;
