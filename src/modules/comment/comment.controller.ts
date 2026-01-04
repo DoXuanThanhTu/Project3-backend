@@ -6,6 +6,29 @@ import { da } from "zod/v4/locales";
 import { UnauthorizedError } from "../../errors/http.error";
 
 export class CommentController {
+  static async getMyComment(req: Request, res: Response) {
+    const {
+      page = 1,
+      limit = 24,
+      sort_field = "updatedAt",
+      sort_type = "desc",
+      country,
+      year,
+      lang = "vi",
+    } = req.query;
+    const userId = req.user?.userId;
+    if (!userId) throw UnauthorizedError;
+    const result = CommentService.getMyComment(userId, {
+      page: parseInt(page as string),
+      limit: parseInt(limit as string),
+      sort_field: sort_field as string,
+      sort_type: sort_type as "asc" | "desc",
+      year: year as string,
+      lang: lang as string,
+    });
+    const data = await result;
+    res.json({ success: true, data: data });
+  }
   // ===== PUBLIC =====
   static async getAllComment(req: Request, res: Response) {
     const {

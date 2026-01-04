@@ -54,6 +54,7 @@ interface IWatchHistoryService {
 
 class WatchHistoryService implements IWatchHistoryService {
   // Thêm hoặc cập nhật lịch sử xem
+  static formatHistoryResponse(data: any) {}
   async addOrUpdateWatchHistory(
     userId: string,
     movieId: string,
@@ -187,6 +188,7 @@ class WatchHistoryService implements IWatchHistoryService {
       genre?: string;
       fromDate?: Date;
       toDate?: Date;
+      lang?: string;
     } = {}
   ): Promise<any> {
     try {
@@ -199,6 +201,7 @@ class WatchHistoryService implements IWatchHistoryService {
         genre,
         fromDate,
         toDate,
+        lang = "vi",
       } = options;
 
       const skip = (page - 1) * limit;
@@ -314,7 +317,7 @@ class WatchHistoryService implements IWatchHistoryService {
           // Populate episode thông tin nếu có episodeId
           if (item.episodeId) {
             const episode = await EpisodeModel.findById(item.episodeId)
-              .select("title number thumbnail duration")
+              .select("title thumbnail duration slug episodeOrLabel")
               .lean();
             return { ...populatedItem, episode };
           }

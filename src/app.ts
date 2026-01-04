@@ -64,6 +64,7 @@ app.use("/api/view", viewRoute);
 app.use("/api/master", adminRoute);
 app.use("/api/favorite", favoriteRoute);
 app.use("/api/watchHistory", watchHistoryRoute);
+app.use("/api/profile", profileRoute);
 app.use("/health", (_, res) => {
   res.json({ success: true, message: "Server is healthy" });
 });

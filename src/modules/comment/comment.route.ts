@@ -18,9 +18,9 @@ router.get("/", CommentController.getAllComment);
 router.use(authenticate);
 
 router.post("/", CommentController.create);
+router.get("/me/comments", CommentController.getMyComment);
 router.patch("/:id", CommentController.update);
 router.post("/react/:id", CommentController.react);
-
 // ===== ADMIN =====
 
 router.use(authorize([Role.ADMIN]));

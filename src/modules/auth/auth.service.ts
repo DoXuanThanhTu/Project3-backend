@@ -7,7 +7,7 @@ import {
   signRefreshToken,
   verifyRefreshToken,
 } from "../../utils/jwt";
-import { UnauthorizedError } from "../../errors/http.error";
+import { UnauthorizedError, BadRequestError } from "../../errors/http.error";
 
 const REFRESH_EXPIRE_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -31,7 +31,6 @@ export class AuthService {
     const ok = await comparePassword(password, user.password);
     if (!ok) {
       console.log("mk k đúng", password);
-
       throw new UnauthorizedError();
     }
 
@@ -78,6 +77,54 @@ export class AuthService {
 
   static async logoutAll(userId: string) {
     await RefreshTokenModel.updateMany({ userId }, { revoked: true });
+  }
+
+  // ===== CHANGE PASSWORD =====
+  static async changePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string
+  ) {
+    // Tìm user
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new UnauthorizedError("Người dùng không tồn tại");
+    }
+
+    // Kiểm tra mật khẩu cũ
+    const isPasswordValid = await comparePassword(oldPassword, user.password);
+    if (!isPasswordValid) {
+      throw new BadRequestError("Mật khẩu cũ không chính xác");
+    }
+
+    // Kiểm tra mật khẩu mới không trùng với mật khẩu cũ
+    const isSamePassword = await comparePassword(newPassword, user.password);
+    if (isSamePassword) {
+      throw new BadRequestError(
+        "Mật khẩu mới không được trùng với mật khẩu cũ"
+      );
+    }
+
+    // Validate mật khẩu mới
+    if (newPassword.length < 6) {
+      throw new BadRequestError("Mật khẩu mới phải có ít nhất 6 ký tự");
+    }
+
+    // Hash mật khẩu mới
+    const hashedPassword = await hashPassword(newPassword);
+
+    // Cập nhật mật khẩu
+    user.password = hashedPassword;
+    user.updatedAt = new Date();
+    await user.save();
+
+    // Optional: Đăng xuất khỏi tất cả các thiết bị (tùy chọn bảo mật)
+    // await this.logoutAll(userId);
+
+    return {
+      success: true,
+      message: "Đổi mật khẩu thành công",
+    };
   }
 
   // ===== PRIVATE =====

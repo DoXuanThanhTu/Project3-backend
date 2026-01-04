@@ -70,7 +70,10 @@ export class ProfileController {
   // Cập nhật preferences
   static async updatePreferences(req: Request, res: Response) {
     try {
-      const { userId } = req.params;
+      const userId = req.user?.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
       if (userId === req.user?.userId || req.user?.role === Role.ADMIN) {
         const preferences = req.body;
 
@@ -94,7 +97,10 @@ export class ProfileController {
   // Lấy lịch sử xem
   static async getWatchHistory(req: Request, res: Response) {
     try {
-      const { userId } = req.params;
+      const userId = req.user?.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
       if (userId === req.user?.userId || req.user?.role === Role.ADMIN) {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 20;
@@ -134,7 +140,10 @@ export class ProfileController {
   // Lấy danh sách yêu thích
   static async getFavorites(req: Request, res: Response) {
     try {
-      const { userId } = req.params;
+      const userId = req.user?.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
       if (userId === req.user?.userId || req.user?.role === Role.ADMIN) {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 20;
@@ -151,17 +160,14 @@ export class ProfileController {
   // Thêm/Xóa yêu thích
   static async toggleFavorite(req: Request, res: Response) {
     try {
-      const { userId } = req.params;
-      if (userId === req.user?.userId || req.user?.role === Role.ADMIN) {
-        const favoriteData = req.body;
-
-        const result = await ProfileService.toggleFavorite(
-          userId,
-          favoriteData
-        );
-        res.status(result.isFavorite ? 201 : 200).json(result);
+      const userId = req.user?.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
       }
-      throw new UnauthorizedError();
+
+      const favoriteData = req.body;
+      const result = await ProfileService.toggleFavorite(userId, favoriteData);
+      res.status(result.isFavorite ? 201 : 200).json(result);
     } catch (error) {
       res.status(500).json({ message: "Server error", error });
     }

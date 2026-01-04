@@ -63,13 +63,62 @@ export class AuthController {
     }
   }
 
+  // ===== CHANGE PASSWORD =====
+  static async changePassword(req: Request, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ message: "Không xác thực được người dùng" });
+      }
+
+      const { oldPassword, newPassword } = req.body;
+
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({
+          message: "Vui lòng cung cấp mật khẩu cũ và mật khẩu mới",
+        });
+      }
+
+      const result = await AuthService.changePassword(
+        userId,
+        oldPassword,
+        newPassword
+      );
+
+      res.json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error: any) {
+      console.error("Change password error:", error);
+
+      if (
+        error.name === "BadRequestError" ||
+        error.name === "UnauthorizedError"
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: "Đổi mật khẩu thất bại. Vui lòng thử lại sau.",
+        error,
+      });
+    }
+  }
+
   private static setRefreshCookie(res: Response, token: string) {
     res.cookie("refreshToken", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       path: "/api/auth",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }
 

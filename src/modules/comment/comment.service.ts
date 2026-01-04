@@ -143,7 +143,82 @@ export class CommentService {
       },
     };
   }
+  static async getMyComment(
+    userId: string,
+    options: {
+      page?: number;
+      limit?: number;
+      sort_field?: string;
+      sort_type?: "asc" | "desc";
+      year?: string;
+      lang?: string;
+    } = {}
+  ) {
+    const {
+      page = 1,
+      limit = 24,
+      sort_field = "updatedAt",
+      sort_type = "desc",
+      year,
+      lang,
+    } = options;
 
+    const query: any = {
+      userId,
+      isDeleted: false,
+    };
+
+    if (year) {
+      query.updatedAt = {
+        $gte: new Date(`${year}-01-01`),
+        $lt: new Date(`${Number(year) + 1}-01-01`),
+      };
+    }
+
+    const sortFieldMap: Record<string, string> = {
+      created: "createdAt",
+      updated: "updatedAt",
+      _id: "_id",
+    };
+
+    const dbSortField = sortFieldMap[sort_field] || "updatedAt";
+    const sortOption: any = {
+      [dbSortField]: sort_type === "asc" ? 1 : -1,
+    };
+
+    const skip = (page - 1) * limit;
+
+    const [comments, total] = await Promise.all([
+      CommentModel.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOption)
+        .populate("userId", "_id displayName avatar")
+        .populate("movieId", "_id title slug")
+        .populate("likes", "_id displayName avatar")
+        .populate("dislikes", "_id displayName avatar")
+        .populate({
+          path: "parentId",
+          populate: {
+            path: "userId",
+            select: "_id displayName avatar",
+          },
+        }),
+      CommentModel.countDocuments(query),
+    ]);
+
+    return {
+      comments: comments.map((comment) =>
+        this.formatComment(comment, options.lang || "vi")
+      ),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
   static async getAllComment(
     options: {
       page?: number;
