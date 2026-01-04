@@ -67,7 +67,7 @@ app.use("/api/watchHistory", watchHistoryRoute);
 app.use("/health", (_, res) => {
   res.json({ success: true, message: "Server is healthy" });
 });
-// startFlagCronJobs();
+startFlagCronJobs();
 
 app.use(errorMiddleware);
 

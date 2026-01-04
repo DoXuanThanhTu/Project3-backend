@@ -4,8 +4,8 @@ import { MovieFlagService } from "../modules/flag/flag.service";
 
 const movieFlagService = new MovieFlagService();
 
-// Chạy mỗi 6 giờ
-const flagCronJob = new CronJob("*/1 * * * *", async () => {
+// Chạy mỗi 1 giờ (vào phút 0)
+const flagCronJob = new CronJob("0 * * * *", async () => {
   console.log("⏰ Running auto flag calculation cron job...");
   try {
     await movieFlagService.calculateAndAssignSystemFlags();
