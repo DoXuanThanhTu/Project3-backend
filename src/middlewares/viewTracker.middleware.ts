@@ -18,8 +18,10 @@ export const trackViewMiddleware = async (
 
         // Gọi service để tăng view (async, không cần await)
         viewCounterService
-          .incrementView(movieId, episodeId, sessionId, {
+          .incrementView(movieId, {
             ipAddress: req.ip,
+            episodeId: episodeId,
+            sessionId: sessionId,
             userAgent: req.get("User-Agent"),
           })
           .catch((err) => console.error("Error tracking view:", err));

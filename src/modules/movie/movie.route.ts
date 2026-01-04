@@ -10,6 +10,7 @@ const router = Router();
 router.get("/full/:slug", MovieController.getFullDetails); // Lấy toàn bộ thông tin movie
 
 router.get("/", MovieController.getPublished); // Lấy danh sách phim đã publish
+router.get("/new", MovieController.getNewMoviePublished); // Lấy danh sách phim mới nhất
 router.get("/type/:type", MovieController.getMoviesByType); // Lấy phim theo type (phim lẻ, phim bộ, series...)
 router.get("/genre/:slug", MovieController.getByGenre); // Lấy phim theo thể loại
 router.get("/search/:keyword", MovieController.searchMovies); // Tìm kiếm phim

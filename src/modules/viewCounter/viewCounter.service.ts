@@ -1,28 +1,66 @@
 // services/view.service.ts
-
+import { Model, Types } from "mongoose";
 import { MovieModel } from "../../models/movie.model";
 import { ViewCounterModel } from "../../models/viewCounter.model";
 
-class ViewService {
+interface IViewService {
+  incrementView(
+    movieId: string,
+    options: {
+      episodeId?: string;
+      sessionId?: string;
+      userId?: string;
+      isUnique?: boolean;
+      watchDuration?: number;
+      viewType?: "movie" | "episode" | "trailer" | "preview";
+      ipAddress?: string;
+      userAgent?: string;
+    }
+  ): Promise<void>;
+  getStatistics(options: {
+    movieId?: string;
+    episodeId?: string;
+    from?: Date;
+    to?: Date;
+    groupBy?: "day" | "week" | "month" | "year";
+    viewType?: string;
+  }): Promise<any[]>;
+  getTopMovies(
+    limit?: number,
+    period?: "day" | "week" | "month" | "year"
+  ): Promise<any[]>;
+  getMovieStats(movieId: string): Promise<{
+    totalViews: number;
+    dailyViews: number;
+    weeklyViews: number;
+  }>;
+  batchUpdateMovieStats(): Promise<void>;
+}
+
+class ViewService implements IViewService {
   private cache = new Map<string, number>();
-  private sessionCache = new Map<string, Set<string>>(); // Để check unique view
-  private batchSize = 100; // Kích thước batch update
-  private updateInterval = 30000; // 30 giây update một lần
+  private sessionCache = new Map<
+    string,
+    { timestamp: number; movieId: string }
+  >();
+  private batchSize = 100;
+  private updateInterval = 30000; // 30 seconds
 
   constructor() {
-    // Tự động batch update mỗi 30 giây
+    // Auto batch update every 30 seconds
     setInterval(() => this.batchUpdateFromCache(), this.updateInterval);
-
-    // Xóa cache cũ mỗi ngày
+    // Clean up old cache daily
     setInterval(() => this.cleanupOldCache(), 24 * 60 * 60 * 1000);
+    // Update movie stats periodically
+    setInterval(() => this.batchUpdateMovieStats(), 5 * 60 * 1000); // Every 5 minutes
   }
 
-  // Tăng view với kiểm tra duplicate
   async incrementView(
     movieId: string,
-    episodeId?: string,
-    sessionId?: string,
     options: {
+      episodeId?: string;
+      sessionId?: string;
+      userId?: string;
       isUnique?: boolean;
       watchDuration?: number;
       viewType?: "movie" | "episode" | "trailer" | "preview";
@@ -31,33 +69,42 @@ class ViewService {
     } = {}
   ) {
     try {
+      // Validate movie exists
+      const movie = await MovieModel.findById(movieId);
+      if (!movie) {
+        console.error(`[VIEW] Movie ${movieId} not found`);
+        return;
+      }
+
       const dateKey = new Date().toISOString().split("T")[0];
-      const viewType = options.viewType || (episodeId ? "episode" : "movie");
+      const viewType =
+        options.viewType || (options.episodeId ? "episode" : "movie");
 
-      // Tạo cache key
-      const cacheKey = `${movieId}:${episodeId || ""}:${dateKey}:${viewType}`;
+      // Check for unique view if sessionId provided
+      if (options.isUnique !== false && options.sessionId) {
+        const sessionKey = `${options.sessionId}:${movieId}:${
+          options.episodeId || ""
+        }`;
 
-      // Kiểm tra unique view nếu có sessionId
-      if (options.isUnique !== false && sessionId) {
-        const sessionKey = `${sessionId}:${movieId}:${episodeId || ""}`;
-
-        // Nếu session đã xem trong vòng 30 phút thì không tính
+        // Check if session viewed in last 30 minutes
         if (this.hasRecentView(sessionKey)) {
-          console.log(
-            `[VIEW] Session ${sessionId} đã xem gần đây, không tính view`
-          );
+          console.log(`[VIEW] Session already viewed recently, skipping`);
           return;
         }
 
-        // Đánh dấu session đã xem
-        this.markSessionViewed(sessionKey);
+        this.markSessionViewed(sessionKey, movieId);
       }
 
-      // Tăng count trong cache
+      // Create cache key
+      const cacheKey = `${movieId}:${
+        options.episodeId || ""
+      }:${dateKey}:${viewType}`;
+
+      // Increment count in cache
       const currentCount = this.cache.get(cacheKey) || 0;
       this.cache.set(cacheKey, currentCount + 1);
 
-      // Cập nhật watch duration nếu có
+      // Update watch duration if provided
       if (options.watchDuration && options.watchDuration > 0) {
         const durationKey = `${cacheKey}:duration`;
         const currentDuration = this.cache.get(durationKey) || 0;
@@ -66,7 +113,7 @@ class ViewService {
 
       console.log(`[VIEW CACHE] ${cacheKey} = ${this.cache.get(cacheKey)}`);
 
-      // Trigger batch update nếu cache đủ lớn
+      // Trigger batch update if cache is large enough
       if (this.cache.size >= this.batchSize) {
         await this.batchUpdateFromCache();
       }
@@ -75,27 +122,32 @@ class ViewService {
     }
   }
 
-  // Kiểm tra session đã xem gần đây chưa
   private hasRecentView(sessionKey: string): boolean {
-    return this.sessionCache.has(sessionKey);
+    const sessionData = this.sessionCache.get(sessionKey);
+    if (!sessionData) return false;
+
+    // Check if viewed within last 30 minutes
+    const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+    return sessionData.timestamp > thirtyMinutesAgo;
   }
 
-  // Đánh dấu session đã xem
-  private markSessionViewed(sessionKey: string) {
-    this.sessionCache.set(sessionKey, new Set([Date.now().toString()]));
+  private markSessionViewed(sessionKey: string, movieId: string) {
+    this.sessionCache.set(sessionKey, {
+      timestamp: Date.now(),
+      movieId,
+    });
 
-    // Tự động xóa sau 30 phút
+    // Auto remove after 30 minutes
     setTimeout(() => {
       this.sessionCache.delete(sessionKey);
     }, 30 * 60 * 1000);
   }
 
-  // Batch update từ cache vào database
   async batchUpdateFromCache() {
     if (this.cache.size === 0) return;
 
     console.log(
-      `[VIEW CACHE] Bắt đầu batch update với ${this.cache.size} items`
+      `[VIEW CACHE] Starting batch update with ${this.cache.size} items`
     );
 
     const updates: Promise<any>[] = [];
@@ -108,35 +160,37 @@ class ViewService {
 
       const date = new Date(dateStr);
 
-      // Chỉ update nếu count > 0
+      // Skip if count <= 0
       if (count <= 0) continue;
 
-      // Check if it's a duration update
+      // Handle duration updates
       if (key.endsWith(":duration")) {
         durationUpdates.set(key.replace(":duration", ""), count);
         continue;
       }
 
       const filter: any = {
-        movieId,
+        movieId: new Types.ObjectId(movieId),
         date,
         viewType: viewType || (episodeId ? "episode" : "movie"),
       };
 
       if (episodeId && episodeId !== "") {
-        filter.episodeId = episodeId;
+        filter.episodeId = new Types.ObjectId(episodeId);
       } else {
         filter.episodeId = null;
       }
-
+      updates.push(
+        MovieModel.findByIdAndUpdate(movieId, { $inc: { views: count } })
+      );
       updates.push(
         ViewCounterModel.findOneAndUpdate(
           filter,
           {
             $inc: { count },
             $setOnInsert: {
-              movieId,
-              episodeId: episodeId || null,
+              movieId: new Types.ObjectId(movieId),
+              episodeId: episodeId ? new Types.ObjectId(episodeId) : null,
               date,
               viewType: viewType || (episodeId ? "episode" : "movie"),
             },
@@ -146,13 +200,18 @@ class ViewService {
       );
     }
 
-    // Xử lý duration updates
+    // Handle duration updates
     for (const [key, duration] of durationUpdates.entries()) {
       const [movieId, episodeId, dateStr, viewType] = key.split(":");
       const date = new Date(dateStr);
 
-      const filter: any = { movieId, date };
-      if (episodeId && episodeId !== "") filter.episodeId = episodeId;
+      const filter: any = {
+        movieId: new Types.ObjectId(movieId),
+        date,
+      };
+      if (episodeId && episodeId !== "") {
+        filter.episodeId = new Types.ObjectId(episodeId);
+      }
 
       updates.push(
         ViewCounterModel.findOneAndUpdate(
@@ -165,80 +224,153 @@ class ViewService {
 
     try {
       await Promise.all(updates);
-      console.log(`[VIEW CACHE] Batch update thành công, xóa cache`);
-
-      // Cập nhật tổng view vào Movie model
-      await this.updateMovieTotalViews();
-
+      console.log(`[VIEW CACHE] Batch update successful, clearing cache`);
       this.cache.clear();
     } catch (error) {
       console.error("Error in batch update:", error);
     }
   }
 
-  // Cập nhật tổng view vào Movie model
-  private async updateMovieTotalViews() {
+  async getMovieStats(movieId: string): Promise<{
+    totalViews: number;
+    dailyViews: number;
+    weeklyViews: number;
+  }> {
     try {
-      // Lấy tất cả movieId từ cache
-      const movieIds = new Set<string>();
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-      for (const key of this.cache.keys()) {
-        const [movieId] = key.split(":");
-        if (movieId) movieIds.add(movieId);
-      }
-
-      for (const movieId of movieIds) {
-        // Tính tổng view của movie
-        const totalViews = await this.getTotalViewsByMovie(movieId);
-
-        // Update vào Movie model
-        await MovieModel.findByIdAndUpdate(movieId, {
-          $set: { views: totalViews },
-        });
-      }
-    } catch (error) {
-      console.error("Error updating movie total views:", error);
-    }
-  }
-
-  // Lấy tổng view của movie
-  async getTotalViewsByMovie(movieId: string): Promise<number> {
-    try {
-      // Tính từ database
-      const dbResult = await ViewCounterModel.aggregate([
-        {
-          $match: {
-            movieId: movieId,
-            viewType: { $in: ["movie", "episode"] }, // Chỉ tính view phim và tập
+      const [dailyStats, weeklyStats, totalStats] = await Promise.all([
+        // Daily views
+        ViewCounterModel.aggregate([
+          {
+            $match: {
+              movieId: new Types.ObjectId(movieId),
+              date: { $gte: oneDayAgo },
+              viewType: { $in: ["movie", "episode"] },
+            },
           },
-        },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: "$count" },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$count" },
+            },
           },
-        },
+        ]),
+        // Weekly views
+        ViewCounterModel.aggregate([
+          {
+            $match: {
+              movieId: new Types.ObjectId(movieId),
+              date: { $gte: oneWeekAgo },
+              viewType: { $in: ["movie", "episode"] },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$count" },
+            },
+          },
+        ]),
+        // Total views
+        ViewCounterModel.aggregate([
+          {
+            $match: {
+              movieId: new Types.ObjectId(movieId),
+              viewType: { $in: ["movie", "episode"] },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$count" },
+            },
+          },
+        ]),
       ]);
 
-      const dbTotal = dbResult.length > 0 ? dbResult[0].total : 0;
-
-      // Tính từ cache
+      // Calculate cache views
+      let cacheDaily = 0;
+      let cacheWeekly = 0;
       let cacheTotal = 0;
+
       for (const [key, count] of this.cache.entries()) {
         const [cachedMovieId] = key.split(":");
         if (cachedMovieId === movieId && !key.endsWith(":duration")) {
           cacheTotal += count;
+
+          const [, , dateStr] = key.split(":");
+          const cacheDate = new Date(dateStr);
+
+          if (cacheDate >= oneDayAgo) {
+            cacheDaily += count;
+          }
+          if (cacheDate >= oneWeekAgo) {
+            cacheWeekly += count;
+          }
         }
       }
 
-      return dbTotal + cacheTotal;
+      return {
+        totalViews: (totalStats[0]?.total || 0) + cacheTotal,
+        dailyViews: (dailyStats[0]?.total || 0) + cacheDaily,
+        weeklyViews: (weeklyStats[0]?.total || 0) + cacheWeekly,
+      };
     } catch (error) {
-      console.error("Error getting total views:", error);
-      return 0;
+      console.error("Error getting movie stats:", error);
+      return { totalViews: 0, dailyViews: 0, weeklyViews: 0 };
     }
   }
 
-  // Thống kê chi tiết
+  async batchUpdateMovieStats(): Promise<void> {
+    try {
+      console.log("[VIEW] Updating movie stats batch...");
+
+      // Get all movie IDs with recent views (last 7 days)
+      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const moviesWithRecentViews = await ViewCounterModel.aggregate([
+        {
+          $match: {
+            date: { $gte: oneWeekAgo },
+            viewType: { $in: ["movie", "episode"] },
+          },
+        },
+        {
+          $group: {
+            _id: "$movieId",
+          },
+        },
+      ]);
+
+      const movieIds = moviesWithRecentViews.map((m) => m._id);
+
+      // Update each movie's stats
+      for (const movieId of movieIds) {
+        try {
+          const stats = await this.getMovieStats(movieId.toString());
+
+          await MovieModel.findByIdAndUpdate(movieId, {
+            $set: {
+              totalViews: stats.totalViews,
+              dailyViews: stats.dailyViews,
+              weeklyViews: stats.weeklyViews,
+              lastTrendingUpdate: new Date(),
+            },
+          });
+        } catch (error) {
+          console.error(`Error updating stats for movie ${movieId}:`, error);
+        }
+      }
+
+      console.log(`[VIEW] Updated stats for ${movieIds.length} movies`);
+    } catch (error) {
+      console.error("Error in batchUpdateMovieStats:", error);
+    }
+  }
+
   async getStatistics(options: {
     movieId?: string;
     episodeId?: string;
@@ -251,8 +383,8 @@ class ViewService {
 
     const matchStage: any = {};
 
-    if (movieId) matchStage.movieId = movieId;
-    if (episodeId) matchStage.episodeId = episodeId;
+    if (movieId) matchStage.movieId = new Types.ObjectId(movieId);
+    if (episodeId) matchStage.episodeId = new Types.ObjectId(episodeId);
     if (viewType) matchStage.viewType = viewType;
 
     if (from || to) {
@@ -315,7 +447,6 @@ class ViewService {
     return await ViewCounterModel.aggregate(pipeline);
   }
 
-  // Top movies theo view
   async getTopMovies(
     limit: number = 10,
     period?: "day" | "week" | "month" | "year"
@@ -345,7 +476,7 @@ class ViewService {
     }
 
     const pipeline: any[] = [
-      { $match: dateFilter },
+      { $match: { ...dateFilter, viewType: { $in: ["movie", "episode"] } } },
       {
         $group: {
           _id: "$movieId",
@@ -372,6 +503,7 @@ class ViewService {
           title: "$movieInfo.title",
           thumbnail: "$movieInfo.thumbnail",
           type: "$movieInfo.type",
+          flags: "$movieInfo.flags",
         },
       },
     ];
@@ -379,16 +511,12 @@ class ViewService {
     return await ViewCounterModel.aggregate(pipeline);
   }
 
-  // Cleanup old cache
   private cleanupOldCache() {
-    // Xóa session cache cũ (trên 1 giờ)
+    // Clean up session cache older than 1 hour
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
 
-    for (const [key, timestamps] of this.sessionCache.entries()) {
-      const newestTimestamp = Math.max(
-        ...Array.from(timestamps).map((t) => parseInt(t))
-      );
-      if (newestTimestamp < oneHourAgo) {
+    for (const [key, sessionData] of this.sessionCache.entries()) {
+      if (sessionData.timestamp < oneHourAgo) {
         this.sessionCache.delete(key);
       }
     }

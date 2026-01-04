@@ -58,6 +58,7 @@ export interface IMovie {
   country?: string;
   isPublished: boolean;
   flags: MovieFlag[];
+  totalViews: number;
   dailyViews: number; // Lượt xem trong ngày
   weeklyViews: number; // Lượt xem trong tuần
   likes: number;

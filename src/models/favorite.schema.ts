@@ -15,18 +15,6 @@ const FavoriteSchema = new Schema<IFavorite>(
       ref: "Movie",
       required: true,
     },
-    movie: {
-      id: { type: String, required: true },
-      title: { type: String, required: true },
-      thumbnail: { type: String, required: true },
-      genres: [{ type: String }],
-      ratingAvg: { type: Number, default: 0 },
-      releasedYear: { type: Number },
-    },
-    addedAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
   {
     timestamps: true,

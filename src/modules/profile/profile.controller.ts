@@ -113,23 +113,23 @@ export class ProfileController {
   }
 
   // Thêm/Xóa lịch sử xem
-  static async addWatchHistory(req: Request, res: Response) {
-    try {
-      const { userId } = req.params;
-      if (userId === req.user?.userId || req.user?.role === Role.ADMIN) {
-        const historyData = req.body;
+  // static async addWatchHistory(req: Request, res: Response) {
+  //   try {
+  //     const { userId } = req.params;
+  //     if (userId === req.user?.userId || req.user?.role === Role.ADMIN) {
+  //       const historyData = req.body;
 
-        const result = await ProfileService.addOrUpdateWatchHistory(
-          userId,
-          historyData
-        );
-        res.status(201).json(result);
-      }
-      throw new UnauthorizedError();
-    } catch (error) {
-      res.status(500).json({ message: "Server error", error });
-    }
-  }
+  //       const result = await ProfileService.addOrUpdateWatchHistory(
+  //         userId,
+  //         historyData
+  //       );
+  //       res.status(201).json(result);
+  //     }
+  //     throw new UnauthorizedError();
+  //   } catch (error) {
+  //     res.status(500).json({ message: "Server error", error });
+  //   }
+  // }
 
   // Lấy danh sách yêu thích
   static async getFavorites(req: Request, res: Response) {

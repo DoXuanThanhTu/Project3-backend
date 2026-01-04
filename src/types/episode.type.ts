@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export interface IEpisode {
-  id: Types.ObjectId;
+  _id: Types.ObjectId;
 
   // Liên kết tới phim và server
   movieId?: Types.ObjectId; // id phim cha

@@ -15,9 +15,11 @@ import serverRoute from "./modules/server/server.route";
 import rankRoute from "./modules/rank/rank.route";
 import profileRoute from "./modules/profile/profile.route";
 import cookieParser from "cookie-parser";
-
+import adminRoute from "./modules/admin/admin.route";
 import { startFlagCronJobs } from "./cron/flagCron";
-
+import viewRoute from "./modules/viewCounter/viewCounter.route";
+import favoriteRoute from "./modules/favorite/favorite.route";
+import watchHistoryRoute from "./modules/watchHistory/watchHistory.route";
 const app = express();
 const allowedOrigins = [
   "http://localhost:8000",
@@ -58,7 +60,10 @@ app.use("/api/comment", commentRoute);
 app.use("/api/episode", episodeRoute);
 app.use("/api/server", serverRoute);
 app.use("/api/rank", rankRoute);
-
+app.use("/api/view", viewRoute);
+app.use("/api/master", adminRoute);
+app.use("/api/favorite", favoriteRoute);
+app.use("/api/watchHistory", watchHistoryRoute);
 app.use("/health", (_, res) => {
   res.json({ success: true, message: "Server is healthy" });
 });

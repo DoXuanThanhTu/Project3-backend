@@ -1,4 +1,5 @@
 import { Role } from "./role.type";
+import { Types } from "mongoose";
 
 export interface IUser {
   _id: string;
@@ -50,33 +51,25 @@ export interface IAchievement {
 
 export interface IWatchHistory {
   _id: string;
-  userId?: string;
-  movie: {
-    id: string;
-    title: string;
-    thumbnail: string;
-    genres: string[];
-    ratingAvg: number;
-    duration: string;
-  };
-  watchedAt: Date;
-  progress: number;
-  duration: number;
+  userId: Types.ObjectId;
+  movieId: Types.ObjectId;
+  episodeId?: Types.ObjectId;
+  currentTime?: number;
+  duration?: number;
+  watchDuration?: number;
+  watchedPercentage?: number;
+  lastWatchedAt?: Date;
+  watchCount?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IFavorite {
   _id: string;
-  userId?: string;
-  movieId?: string;
-  movie: {
-    id: string;
-    title: string;
-    thumbnail: string;
-    genres: string[];
-    ratingAvg: number;
-    releasedYear?: number;
-  };
-  addedAt: Date;
+  userId: Types.ObjectId;
+  movieId: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IReview {

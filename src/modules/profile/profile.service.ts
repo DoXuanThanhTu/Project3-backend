@@ -137,44 +137,43 @@ export class ProfileService {
     };
   }
 
-  static async addOrUpdateWatchHistory(
-    userId: string,
-    historyData: Omit<IWatchHistory, "_id" | "userId" | "watchedAt">
-  ) {
-    const existing = await WatchHistoryModel.findOne({
-      userId,
-      "movie.id": historyData.movie.id,
-    });
+  // static async addOrUpdateWatchHistory(
+  //   userId: string,
+  //   historyData: Omit<IWatchHistory, "_id" | "userId" | "watchedAt">
+  // ) {
+  //   const existing = await WatchHistoryModel.findOne({
+  //     userId,
+  //     "movie.id": historyData.movie.id,
+  //   });
 
-    if (existing) {
-      const updated = await WatchHistoryModel.findOneAndUpdate(
-        { _id: existing._id },
-        {
-          $set: {
-            progress: historyData.progress,
-            watchedAt: new Date(),
-          },
-        },
-        { new: true }
-      );
-      return updated;
-    }
+  //   if (existing) {
+  //     const updated = await WatchHistoryModel.findOneAndUpdate(
+  //       { _id: existing._id },
+  //       {
+  //         $set: {
+  //           progress: historyData.progress,
+  //           watchedAt: new Date(),
+  //         },
+  //       },
+  //       { new: true }
+  //     );
+  //     return updated;
+  //   }
 
-    const history = await WatchHistoryModel.create({
-      userId,
-      ...historyData,
-      watchedAt: new Date(),
-    });
+  //   const history = await WatchHistoryModel.create({
+  //     userId,
+  //     ...historyData,
+  //   });
 
-    await UserModel.findByIdAndUpdate(userId, {
-      $inc: {
-        "stats.totalWatched": 1,
-        "stats.totalHours": Math.ceil(historyData.duration / 60),
-      },
-    });
+  //   await UserModel.findByIdAndUpdate(userId, {
+  //     $inc: {
+  //       "stats.totalWatched": 1,
+  //       "stats.totalHours": Math.ceil(historyData.duration / 60),
+  //     },
+  //   });
 
-    return history;
-  }
+  //   return history;
+  // }
 
   // Favorite Services
   static async getFavorites(
@@ -224,7 +223,6 @@ export class ProfileService {
     const favorite = await FavoriteModel.create({
       userId,
       ...favoriteData,
-      addedAt: new Date(),
     });
 
     await UserModel.findByIdAndUpdate(userId, {

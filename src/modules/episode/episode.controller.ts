@@ -15,7 +15,7 @@ export class EpisodeController {
     const episodes = await EpisodeService.getAllEpisode(limit);
 
     const data = episodes.map((ep: IEpisode) => ({
-      id: ep.id,
+      id: ep._id,
       title: getLocalizedValue(ep.title, lang, ep.defaultLang),
       description: ep.description
         ? getLocalizedValue(ep.description, lang, ep.defaultLang)
@@ -44,7 +44,7 @@ export class EpisodeController {
     const episodes = await EpisodeService.getByMovie(req.params.movieId, limit);
 
     const data = episodes.map((ep: IEpisode) => ({
-      id: ep.id,
+      id: ep._id,
       title: getLocalizedValue(ep.title, lang, ep.defaultLang),
       slug: getLocalizedValue(ep.slug, lang, ep.defaultLang),
       episodeOrLabel: ep.episodeOrLabel,

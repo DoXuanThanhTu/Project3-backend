@@ -9,8 +9,8 @@ const controller = new MovieFlagController();
 
 // Admin routes (cần auth và admin role)
 // Public routes
-router.get("/flags/:flagType/movies", controller.getMoviesByFlag);
-router.get("/movies/:movieId/flags", controller.getMovieFlags);
+router.get("/:flagType/movies", controller.getMoviesByFlag);
+router.get("/movies/:movieId", controller.getMovieFlags);
 
 // System endpoint (có thể bảo vệ bằng API key)
 router.post("/system/calculate-flags", controller.calculateSystemFlags);

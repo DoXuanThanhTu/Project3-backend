@@ -1,4 +1,4 @@
-import { Schema, model, Types, Document } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 import { IMovie, MovieFlagType, MovieType } from "../types/movie.type";
 
 const movieFlagSchema = new Schema(
@@ -38,7 +38,7 @@ const movieSchema = new Schema<IMovie>(
     title: {
       type: Map,
       of: String,
-      required: true, // ít nhất 1 ngôn ngữ
+      required: true,
     },
 
     description: {
@@ -52,13 +52,11 @@ const movieSchema = new Schema<IMovie>(
       required: true,
     },
 
-    // ===== META =====
     defaultLang: {
       type: String,
       default: "vi",
     },
 
-    // ===== MEDIA =====
     poster: { type: String },
     thumbnail: { type: String },
     banner: { type: String },
@@ -73,23 +71,18 @@ const movieSchema = new Schema<IMovie>(
     },
     currentEpisode: { type: Number },
     totalEpisodes: { type: Number },
-    // ===== RELATION =====
+
     genres: [{ type: Types.ObjectId, ref: "Genre" }],
     cast: [{ type: Types.ObjectId, ref: "Person" }],
     director: { type: Types.ObjectId, ref: "Person" },
 
-    // ===== STAT =====
     ratingAvg: { type: Number, default: 0 },
-    views: { type: Number, default: 0 },
-    year: { type: Number }, // Năm sản xuất
-    country: { type: String }, // Quốc gia (có thể nhiều)
+    year: { type: Number },
+    country: { type: String },
     isPublished: { type: Boolean, default: false },
-    // ... các field hiện có giữ nguyên ...
 
-    // Thêm flags
     flags: [movieFlagSchema],
-
-    // Thêm field thống kê
+    views: { type: Number, default: 0 },
     dailyViews: { type: Number, default: 0 },
     weeklyViews: { type: Number, default: 0 },
     likes: { type: Number, default: 0 },
@@ -101,7 +94,6 @@ const movieSchema = new Schema<IMovie>(
   { timestamps: true }
 );
 
-// Indexes cho query hiệu quả
 movieSchema.index({ "flags.type": 1, "flags.endAt": 1 });
 movieSchema.index({ "flags.type": 1, "flags.startAt": 1, "flags.endAt": 1 });
 movieSchema.index({ dailyViews: -1 });

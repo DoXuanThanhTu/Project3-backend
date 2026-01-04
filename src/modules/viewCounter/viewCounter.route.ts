@@ -1,24 +1,30 @@
 // routes/view.routes.ts
 import express, { Router } from "express";
 import {
-  getMovieTotalViews,
-  getStatistics,
-  getTopMovies,
   incrementView,
+  getStatistics,
+  getMovieStats,
+  getTopMovies,
+  getTrendingMovies,
+  getViewAnalytics,
+  manualUpdateMovieStats,
+  batchUpdateAllMovieStats,
 } from "./viewCounter.controller";
 
 const router: Router = express.Router();
 
-// Tăng view
+// Public routes
 router.post("/increment", incrementView);
-
-// Lấy thống kê
 router.get("/stats", getStatistics);
-
-// Lấy tổng view của movie
-router.get("/movie/:movieId/total", getMovieTotalViews);
-
-// Lấy top movies
+router.get("/movie/:movieId/stats", getMovieStats);
 router.get("/top", getTopMovies);
+router.get("/trending", getTrendingMovies);
+
+// Analytics route
+router.get("/analytics", getViewAnalytics);
+
+// Admin routes (might want to add authentication middleware)
+router.post("/movie/:movieId/update-stats", manualUpdateMovieStats);
+router.post("/batch-update-stats", batchUpdateAllMovieStats);
 
 export default router;

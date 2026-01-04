@@ -17,7 +17,7 @@ router.use(authenticate);
 router.get("/me", ProfileController.getMe);
 router.patch("/update", ProfileController.updateProfile);
 router.patch("/preferences", ProfileController.updatePreferences);
-router.post("/watch-history", ProfileController.addWatchHistory);
+// router.post("/watch-history", ProfileController.addWatchHistory);
 router.post("/favorites/toggle", ProfileController.toggleFavorite);
 router.post("/reviews", ProfileController.createOrUpdateReview);
 router.delete("/reviews/:reviewId", ProfileController.deleteReview);

@@ -8,31 +8,40 @@ const WatchHistorySchema = new Schema<IWatchHistory>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      // index: true,
     },
-    movie: {
-      id: { type: String, required: true },
-      title: { type: String, required: true },
-      thumbnail: { type: String, required: true },
-      genres: [{ type: String }],
-      ratingAvg: { type: Number, default: 0 },
-      duration: { type: String },
+    movieId: {
+      type: Schema.Types.ObjectId,
+      ref: "Movie",
+      required: true,
     },
-    watchedAt: {
-      type: Date,
-      default: Date.now,
-      // index: true,
+    episodeId: {
+      type: Schema.Types.ObjectId,
+      ref: "Episode",
+      required: false,
     },
-    progress: {
+    currentTime: {
       type: Number,
       default: 0,
-      min: 0,
-      max: 100,
     },
     duration: {
       type: Number,
-      required: true,
-      min: 1,
+      default: 0,
+    },
+    watchDuration: {
+      type: Number,
+      default: 0,
+    },
+    watchedPercentage: {
+      type: Number,
+      default: 0,
+    },
+    lastWatchedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    watchCount: {
+      type: Number,
+      default: 1,
     },
   },
   {

@@ -7,9 +7,7 @@ import { EpisodeModel } from "../../models/episode.model";
 import { IEpisode } from "../../types/episode.type";
 import mongoose, { mongo, ObjectId, Types } from "mongoose";
 import { IServer } from "../../types/server.type";
-import { fr } from "zod/v4/locales";
 import { getLocalizedValue, getLocalizedValueMap } from "../../utils/i18n.util";
-import { get } from "node:http";
 type EpisodeMeta = {
   episode: IEpisode;
   typePriority: number;
@@ -138,7 +136,78 @@ export class MovieService {
     // await movie.save();
     return this.formatMovieMap(movie, lang);
   }
+  static async getNewMovies(
+    options: {
+      page?: number;
+      limit?: number;
+      sort_field?: string;
+      sort_type?: "asc" | "desc";
+      country?: string;
+      year?: string;
+      lang?: string;
+    } = {}
+  ) {
+    const {
+      page = 1,
+      limit = 24,
+      sort_field = "createdAt",
+      sort_type = "desc",
+      country,
+      year,
+      lang = "vi",
+    } = options;
 
+    const query: any = {
+      isPublished: true,
+    };
+
+    // Lọc theo quốc gia nếu có
+    if (country) {
+      const countries = country.split(",").map((c) => c.trim());
+      query.country = { $in: countries };
+    }
+
+    // Lọc theo năm nếu có
+    if (year) {
+      query.relasedYear = parseInt(year);
+    }
+
+    // Xử lý sắp xếp
+    let sortOption: any = {};
+    const sortFieldMap: Record<string, string> = {
+      "modified.time": "updatedAt",
+      year: "relasedYear",
+      _id: "_id",
+      rating: "ratingAvg",
+      views: "views",
+    };
+
+    const dbSortField = sortFieldMap[sort_field] || "createdAt";
+    sortOption[dbSortField] = sort_type === "asc" ? 1 : -1;
+
+    const skip = (page - 1) * limit;
+
+    const [movies, total] = await Promise.all([
+      MovieModel.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOption)
+        .populate("genres")
+        .populate("franchiseId", "_id title")
+        .populate("director"),
+      MovieModel.countDocuments(query),
+    ]);
+
+    return {
+      movies: movies.map((movie) => this.formatMovieMap(movie, lang)),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
   static async getMoviesByGenreSlug(
     genreSlug: string,
     options: {
@@ -437,7 +506,7 @@ export class MovieService {
       })
         .populate("franchiseId", "title slug")
         .populate("genres", "title slug")
-        .populate("director", "name")
+        .populate("director", "name avatar")
         .populate("cast", "name avatar")
         .lean();
 
@@ -650,7 +719,7 @@ export class MovieService {
    */
   static formatEpisode(episode: IEpisode, lang: string): any {
     return {
-      id: episode.id,
+      id: episode._id,
       movieId: episode.movieId,
       serverId: episode.serverId,
       title: getLocalizedValue(episode.title, lang, episode.defaultLang),

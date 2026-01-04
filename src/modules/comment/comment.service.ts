@@ -1,5 +1,6 @@
 import { NotFoundError } from "../../errors/http.error";
 import { CommentModel } from "../../models/comment.model";
+import { MovieModel } from "../../models/movie.model";
 import { IComment } from "../../types/comment.type";
 import { getLocalizedValueMap } from "../../utils/i18n.util";
 
@@ -256,7 +257,11 @@ export class CommentService {
         $inc: { replyCount: 1 },
       });
     }
-
+    if (data.movieId) {
+      await MovieModel.findByIdAndUpdate(data.movieId, {
+        $inc: { comments: 1 },
+      });
+    }
     // 3. Lấy comment vừa tạo với populate
     const createdComment = await CommentModel.findById(comment._id)
       .populate("movieId", "_id title slug")
@@ -284,6 +289,16 @@ export class CommentService {
       { isDeleted: true },
       { new: true }
     );
+    if (comment?.movieId) {
+      await MovieModel.findByIdAndUpdate(comment.movieId, {
+        $inc: { comments: -1 },
+      });
+    }
+    if (comment?.parentId) {
+      await CommentModel.findByIdAndUpdate(comment.parentId, {
+        $inc: { replyCount: -1 },
+      });
+    }
     if (!comment) throw new NotFoundError("Comment not found");
   }
   static async reactComment(

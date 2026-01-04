@@ -7,7 +7,39 @@ import { MovieModel } from "../../models/movie.model";
 
 export class MovieController {
   // ===== USER =====
+  static async getNewMoviePublished(req: Request, res: Response) {
+    try {
+      const {
+        page = 1,
+        limit = 24,
+        sort_field = "createdAt",
+        sort_type = "desc",
+        country,
+        year,
+        lang = "vi",
+      } = req.query;
 
+      const result = await MovieService.getNewMovies({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        sort_field: sort_field as string,
+        sort_type: sort_type as "asc" | "desc",
+        country: country as string,
+        year: year as string,
+        lang: lang as string,
+      });
+      res.json({
+        success: true,
+        data: result.movies,
+      });
+    } catch (error: any) {
+      console.error("Error in getPublished:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
   static async getPublished(req: Request, res: Response) {
     try {
       const {
