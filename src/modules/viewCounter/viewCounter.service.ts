@@ -52,7 +52,7 @@ class ViewService implements IViewService {
     // Clean up old cache daily
     setInterval(() => this.cleanupOldCache(), 24 * 60 * 60 * 1000);
     // Update movie stats periodically
-    setInterval(() => this.batchUpdateMovieStats(), 5 * 60 * 1000); // Every 5 minutes
+    setInterval(() => this.batchUpdateMovieStats(), 60 * 1000); // Every minute
   }
 
   async incrementView(

@@ -344,6 +344,7 @@ export class MovieFlagService {
       comments: 0,
       title: getLocalizedValueMap(m.title, lang, m.defaultLang),
       slug: getLocalizedValueMap(m.slug, lang, m.defaultLang),
+      description: getLocalizedValueMap(m.description, lang, m.defaultLang),
       poster: m.poster,
       thumbnail: m.thumbnail,
       banner: m.banner,

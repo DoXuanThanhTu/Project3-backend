@@ -23,6 +23,8 @@ import watchHistoryRoute from "./modules/watchHistory/watchHistory.route";
 const app = express();
 const allowedOrigins = [
   "http://localhost:8000",
+  "http://localhost:8000/",
+
   "http://localhost:3000",
   "https://movie-website-mytus.netlify.app/",
   "https://movie-website-mytus.netlify.app",
@@ -31,7 +33,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Cho phép request không có origin (curl, Postman, server-to-server)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -46,7 +47,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
-app.use(globalRateLimit);
+// app.use(globalRateLimit);
 
 app.use("/api/auth", authRoute);
 app.use("/api/profile", profileRoute);

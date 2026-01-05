@@ -24,7 +24,7 @@ router.post("/refresh", validate(refreshSchema), AuthController.refresh);
 
 router.post("/logout", AuthController.logout);
 router.use(authenticate);
-
+router.get("/me", AuthController.getMe);
 router.post(
   "/change-password",
   authRateLimit, // Giới hạn rate

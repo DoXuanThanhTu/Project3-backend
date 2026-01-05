@@ -14,7 +14,8 @@ export enum MovieFlagType {
   HOT = "hot",
   FEATURED = "featured",
   FAVORITE = "favorite",
-  PROMOTION = "promotion", // Có thể thêm các flag khác
+  PROMOTION = "promotion",
+  BANNER = "banner", // Có thể thêm các flag khác
 }
 export interface MovieFlag {
   type: MovieFlagType;

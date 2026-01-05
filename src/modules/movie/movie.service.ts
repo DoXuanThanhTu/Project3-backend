@@ -412,7 +412,7 @@ export class MovieService {
   static async getMovieById(id: string, lang: string = "vi") {
     const movie = await MovieModel.findById(id)
       .populate("genres")
-      .populate("franchiseId", "title _id")
+      .populate("franchiseId")
       .populate("cast")
       .populate("director");
 
@@ -773,6 +773,8 @@ export class MovieService {
         })) || [],
       poster: movie.poster,
       thumbnail: movie.thumbnail,
+      banner: movie.banner,
+      backdrop: movie.backdrop,
       type: movie.type,
       year: movie.year,
       ratingAvg: movie.ratingAvg,

@@ -65,7 +65,7 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
     },
-    coverImage: {
+    cover: {
       type: String,
     },
     password: {
@@ -113,6 +113,10 @@ const UserSchema = new Schema<IUser>(
         ref: "User",
       },
     ],
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

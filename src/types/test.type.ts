@@ -9,7 +9,7 @@ export interface IUser {
   email: string;
   phone?: string;
   avatar?: string;
-  coverImage?: string;
+  cover?: string;
   password: string;
   joinDate: Date;
   membership: "Free" | "Premium" | "VIP";
@@ -22,6 +22,7 @@ export interface IUser {
   following?: string[];
   createdAt: Date;
   updatedAt: Date;
+  isActive: boolean;
 }
 
 export interface IUserPreference {

@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
+import { UserModel } from "../../models/user.model";
 
 export class AuthController {
+  static async getMe(req: Request, res: Response) {
+    const userId = req.user?.userId;
+    const result = await UserModel.findById(userId);
+    res.json(result);
+  }
   static async register(req: Request, res: Response) {
     const data = await AuthService.register(
       req.body.email,
