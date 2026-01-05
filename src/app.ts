@@ -28,6 +28,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://movie-website-mytus.netlify.app/",
   "https://movie-website-mytus.netlify.app",
+  "https://movie-website-mytus-admin.netlify.app/",
+  "https://movie-website-mytus-admin.netlify.app",
 ];
 
 app.use(
