@@ -345,6 +345,12 @@ export class MovieFlagService {
       title: getLocalizedValueMap(m.title, lang, m.defaultLang),
       slug: getLocalizedValueMap(m.slug, lang, m.defaultLang),
       description: getLocalizedValueMap(m.description, lang, m.defaultLang),
+      genres:
+        m.genres?.map((g: any) => ({
+          id: g._id,
+          title: getLocalizedValueMap(g.title, lang as string, m.defaultLang),
+          slug: getLocalizedValueMap(g.slug, lang as string, m.defaultLang),
+        })) || [],
       poster: m.poster,
       thumbnail: m.thumbnail,
       banner: m.banner,
